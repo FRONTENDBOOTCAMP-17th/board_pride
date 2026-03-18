@@ -6,34 +6,68 @@
     <style>
       body {
         font-family: 'Pretendard', sans-serif;
-        background-color: #f8f9fa;
+        background-color: #f5f6f8;
         color: #333;
-        max-width: 800px;
-        margin: 0 auto;
+        margin: 0;
+        min-height: 100vh;
         padding: 40px 20px;
+        box-sizing: border-box;
       }
 
       h2 {
+        margin: 0 0 20px;
+        color: #333;
         text-align: center;
-        margin-bottom: 30px;
-        color: #2c3e50;
+      }
+
+      .top-bar {
+        max-width: 800px;
+        margin: 0 auto 20px;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .write-btn {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        background-color: #222;
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .write-btn:hover {
+        background-color: #444;
+      }
+
+      #post-list,
+      #message,
+      h2 {
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
       }
 
       #post-list {
         list-style: none;
         padding: 0;
-        margin: 0;
+        margin-top: 0;
+        margin-bottom: 0;
       }
 
       #post-list li {
-        background: #ffffff;
+        background: white;
         margin-bottom: 16px;
         padding: 24px;
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 20px;
         transition:
           transform 0.2s ease,
           box-shadow 0.2s ease;
@@ -41,36 +75,36 @@
 
       #post-list li:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
       }
 
       .post-content {
         flex-grow: 1;
-        padding-right: 20px;
+        min-width: 0;
       }
 
       .post-title {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
         font-weight: bold;
         text-decoration: none;
-        color: #1a73e8;
+        color: #222;
         display: block;
         margin-bottom: 8px;
       }
 
       .post-title:hover {
-        text-decoration: underline;
+        color: #007bff;
       }
 
       .post-info {
-        font-size: 0.85rem;
-        color: #6c757d;
-        margin-bottom: 12px;
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 10px;
       }
 
       .post-preview {
         font-size: 0.95rem;
-        color: #495057;
+        color: #555;
         line-height: 1.5;
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -85,42 +119,58 @@
       }
 
       button {
-        padding: 8px 14px;
+        padding: 10px 14px;
         border: none;
         border-radius: 6px;
         cursor: pointer;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: background-color 0.2s;
+        font-size: 14px;
+        font-weight: bold;
+        transition: background 0.2s;
       }
 
       .btn-edit {
-        background-color: #f1f3f4;
-        color: #3c4043;
+        background-color: #222;
+        color: white;
       }
 
       .btn-edit:hover {
-        background-color: #e8eaed;
+        background-color: #444;
       }
 
       .btn-delete {
-        background-color: #ffe3e3;
-        color: #c92a2a;
+        background-color: #f1f3f5;
+        color: #333;
       }
 
       .btn-delete:hover {
-        background-color: #ffc9c9;
+        background-color: #e9ecef;
       }
 
       #message {
         text-align: center;
-        font-size: 1.1rem;
+        font-size: 14px;
         color: #666;
+        margin-top: 20px;
+      }
+
+      @media (max-width: 640px) {
+        #post-list li {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .post-actions {
+          justify-content: flex-end;
+        }
       }
     </style>
   </head>
   <body>
     <h2>게시글 목록</h2>
+
+    <div class="top-bar">
+      <button class="write-btn" onclick="location.href='write.html'">글쓰기</button>
+    </div>
 
     <ul id="post-list"></ul>
     <p id="message">불러오는 중...</p>
@@ -156,7 +206,7 @@
             contentDiv.className = 'post-content';
 
             const link = document.createElement('a');
-            link.href = 'detail.html?id=' + post.id;
+            link.href = './게시물상세정보.html?id=' + post.id;
             link.textContent = post.title;
             link.className = 'post-title';
 
@@ -179,7 +229,7 @@
             editBtn.textContent = '수정';
             editBtn.className = 'btn-edit';
             editBtn.onclick = () => {
-              window.location.href = `post.html?id=${post.id}`;
+              window.location.href = `write.html?id=${post.id}`;
             };
 
             const deleteBtn = document.createElement('button');

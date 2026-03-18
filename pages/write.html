@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>글쓰기</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Pretendard', sans-serif;
+        background-color: #f5f6f8;
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 520px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        margin: 0 0 25px;
+        font-size: 26px;
+        font-weight: 700;
+        color: #333;
+      }
+
+      .user {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 25px;
+      }
+
+      input,
+      textarea {
+        font-family: 'Pretendard', sans-serif;
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 12px;
+        font-size: 14px;
+        background: #fff;
+        transition: border 0.2s;
+      }
+
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #999;
+      }
+
+      textarea {
+        height: 160px;
+        resize: none;
+        margin-top: 10px;
+      }
+
+      .writeBtn {
+        width: 100%;
+        margin-top: 25px;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        background-color: #222;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .writeBtn:hover {
+        background-color: #444;
+      }
+
+      .writeBtn:active {
+        transform: scale(0.98);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2 id="pageTitle">게시글 작성</h2>
+
+      <p class="user">닉네임: <span id="username"></span></p>
+
+      <input id="title" placeholder="제목을 입력하세요." />
+      <br /><br />
+      <textarea id="content" placeholder="내용을 입력하세요."></textarea>
+      <br /><br />
+
+      <button class="writeBtn" id="writeBtn">작성하기</button>
+    </div>
+
+    <script>
+      const token = localStorage.getItem('token');
+      const params = new URLSearchParams(window.location.search);
+      const postId = params.get('id');
+
+      const usernameEl = document.getElementById('username');
+      const titleEl = document.getElementById('title');
+      const contentEl = document.getElementById('content');
+      const writeBtn = document.getElementById('writeBtn');
+      const pageTitle = document.getElementById('pageTitle');
+
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        window.location.href = 'login.html';
+      } else {
+        init();
+      }
+
+      async function init() {
+        await loadUserInfo();
+
+        if (postId) {
+          pageTitle.textContent = '게시글 수정';
+          writeBtn.textContent = '수정하기';
+          await loadPost(postId);
+        }
+      }
+
+      async function loadUserInfo() {
+        try {
+          const res = await fetch('https://api.fullstackfamily.com/api/edu/pride-d1c90b/auth/me', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const data = await res.json();
+          console.log('내 정보:', data);
+
+          if (!res.ok) {
+            throw new Error('사용자 정보 조회 실패');
+          }
+
+          usernameEl.textContent = data.data.nickname || '이름 없음';
+        } catch (e) {
+          console.error(e);
+          usernameEl.textContent = '이름 불러오기 실패';
+        }
+      }
+
+      async function loadPost(id) {
+        try {
+          const res = await fetch(`https://api.fullstackfamily.com/api/edu/pride-d1c90b/posts/${id}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const data = await res.json();
+          console.log('게시글 정보:', data);
+
+          if (!res.ok) {
+            throw new Error('게시글 조회 실패');
+          }
+
+          const post = data.data;
+
+          titleEl.value = post.title || '';
+          contentEl.value = post.content || '';
+        } catch (e) {
+          console.error(e);
+          alert('게시글 불러오기 실패');
+        }
+      }
+
+      writeBtn.addEventListener('click', async () => {
+        const title = titleEl.value.trim();
+        const content = contentEl.value.trim();
+
+        if (!title || !content) {
+          alert('제목과 내용을 모두 입력해주세요.');
+          return;
+        }
+
+        try {
+          if (postId) {
+            const updateRes = await fetch(`https://api.fullstackfamily.com/api/edu/pride-d1c90b/posts/${postId}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ title, content }),
+            });
+
+            const updateData = await updateRes.json();
+            console.log('수정 결과:', updateData);
+
+            if (!updateRes.ok) {
+              throw new Error('게시글 수정 실패');
+            }
+
+            alert('게시글 수정 완료!');
+          } else {
+            const draftRes = await fetch('https://api.fullstackfamily.com/api/edu/pride-d1c90b/posts', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ title, content }),
+            });
+
+            const draftData = await draftRes.json();
+            console.log('draft:', draftData);
+
+            if (!draftRes.ok) {
+              throw new Error('드래프트 생성 실패');
+            }
+
+            const newPostId = draftData.data.id;
+
+            const publishRes = await fetch(`https://api.fullstackfamily.com/api/edu/pride-d1c90b/posts/${newPostId}/publish`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ title, content }),
+            });
+
+            const publishData = await publishRes.json();
+            console.log('publish:', publishData);
+
+            if (!publishRes.ok) {
+              throw new Error('발행 실패');
+            }
+
+            alert('게시글 작성 완료!');
+          }
+
+          window.location.href = 'list.html';
+        } catch (error) {
+          console.error(error);
+          alert('작업 실패');
+        }
+      });
+    </script>
+  </body>
+</html>
