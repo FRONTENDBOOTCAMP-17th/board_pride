@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>회원가입</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      fieldset {
+        display: flex;
+        flex-flow: nowrap column;
+        gap: 20px;
+        inline-size: 300px;
+        margin-top: 50px;
+        justify-content: center;
+        text-align: center;
+      }
+
+      legend {
+        font-size: 1.5em;
+      }
+
+      #result {
+        display: grid;
+        block-size: 30px;
+      }
+
+      .error {
+        display: block;
+        color: red;
+        font-size: 0.8em;
+        text-align: left;
+        margin-top: -10px;
+      }
+
+      pre {
+        font-size: 1rem;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <fieldset>
+      <legend>회원가입</legend>
+      <input type="text" id="username" placeholder="아이디 (영문, 숫자 4~12자)" />
+      <span class="error" id="usernameError"></span>
+      <input type="password" id="password" placeholder="비밀번호 (영문, 숫자, 특수문자 8자 이상)" />
+      <span class="error" id="passwordError"></span>
+      <input type="text" id="nickname" placeholder="닉네임 (한글만 가능)" />
+      <span class="error" id="nicknameError"></span>
+      <button id="submitBtn">회원가입</button>
+    </fieldset>
+
+    <pre id="result"></pre>
+
+    <script>
+      const rules = {
+        username: /^[A-Za-z0-9]{4,12}$/,
+        password: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/,
+        nickname: /^[가-힣]+$/,
+      };
+
+      const messages = {
+        username: '아이디는 영문, 숫자 4~12자여야 합니다.',
+        password: '비밀번호는 영문, 숫자, 특수문자를 포함한 8자 이상이어야 합니다.',
+        nickname: '닉네임은 한글만 입력 가능합니다.',
+      };
+
+      function validate() {
+        let isValid = true;
+
+        for (const field in rules) {
+          const value = document.getElementById(field).value.trim();
+          const errorEl = document.getElementById(field + 'Error');
+
+          if (!rules[field].test(value)) {
+            errorEl.textContent = messages[field];
+            isValid = false;
+          } else {
+            errorEl.textContent = '';
+          }
+        }
+
+        return isValid;
+      }
+
+      document.getElementById('submitBtn').addEventListener('click', async () => {
+        const result = document.getElementById('result');
+
+        if (!validate()) return;
+
+        const signupData = {
+          username: document.getElementById('username').value,
+          password: document.getElementById('password').value,
+          nickname: document.getElementById('nickname').value,
+        };
+
+        try {
+          result.textContent = '전송 중...';
+
+          const res = await fetch('https://api.fullstackfamily.com/api/edu/pride-d1c90b/auth/signup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(signupData),
+          });
+
+          if (!res.ok) {
+            throw new Error('HTTP 오류: ' + res.status);
+          }
+
+          const data = await res.json();
+          result.textContent = '회원가입 성공!\n' + '\nusername: ' + data.data.username + '\nnickname: ' + data.data.nickname;
+          result.style.color = 'green';
+        } catch (error) {
+          result.textContent = '에러 발생: ' + error.message;
+          result.style.color = 'red';
+        }
+      });
+    </script>
+  </body>
+</html>
