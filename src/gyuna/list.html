@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>게시글 목록</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f5f6f8;
+        margin: 0;
+      }
+
+      .header {
+        padding: 15px 30px;
+        background: white;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .logoutBtn {
+        background: none;
+        border: 1px solid #ddd;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .logoutBtn:hover {
+        background: #f2f2f2;
+      }
+
+      .container {
+        width: 800px;
+        margin: 30px auto;
+      }
+
+      .writeBox {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 15px;
+      }
+
+      .writeBtn {
+        background: #222;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+      }
+
+      .writeBtn:hover {
+        background: #444;
+      }
+
+      .post {
+        background: white;
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 15px;
+        border: 1px solid #eee;
+        transition: 0.2s;
+      }
+
+      .post:hover {
+        border-color: #ccc;
+      }
+
+      .post a {
+        text-decoration: none;
+        font-size: 17px;
+        font-weight: 600;
+        color: #222;
+      }
+
+      .info {
+        font-size: 13px;
+        color: #888;
+        margin-top: 5px;
+      }
+
+      .preview {
+        margin-top: 10px;
+        color: #444;
+      }
+
+      #message {
+        text-align: center;
+        color: #888;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header">
+      <h2>게시판</h2>
+      <button class="logoutBtn" id="logoutBtn">로그아웃</button>
+    </div>
+
+    <div class="container">
+      <div class="writeBox">
+        <button class="writeBtn" id="writeBtn">글쓰기</button>
+      </div>
+
+      <div id="post-list"></div>
+      <p id="message">불러오는 중...</p>
+    </div>
+
+    <script>
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("로그인이 필요합니다.");
+        window.location.href = "login.html";
+      }
+
+      const postList = document.getElementById("post-list");
+      const message = document.getElementById("message");
+
+      async function loadPosts() {
+        try {
+          const res = await fetch(
+            "https://api.fullstackfamily.com/api/edu/ws-8fd532/posts",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
+
+          const data = await res.json();
+          const posts = data.data.content;
+
+          if (!posts || posts.length === 0) {
+            message.textContent = "게시글이 없습니다.";
+            return;
+          }
+
+          message.textContent = "";
+
+          posts.forEach((post) => {
+            const div = document.createElement("div");
+            div.className = "post";
+
+            div.innerHTML = `
+              <a href="detail.html?id=${post.id}">
+                ${post.title}
+              </a>
+              <div class="info">
+                ${post.authorNickname} | 조회 ${post.viewCount} | 댓글 ${post.commentCount}
+              </div>
+              <div class="preview">
+                ${post.contentPreview}
+              </div>
+            `;
+
+            postList.appendChild(div);
+          });
+        } catch (error) {
+          console.error(error);
+          message.style.color = "red";
+          message.textContent = "게시글 불러오기 실패";
+        }
+      }
+
+      loadPosts();
+
+      document.getElementById("writeBtn").onclick = () => {
+        window.location.href = "write.html";
+      };
+
+      document.getElementById("logoutBtn").onclick = () => {
+        localStorage.removeItem("token");
+        alert("로그아웃되었습니다.");
+        window.location.href = "login.html";
+      };
+    </script>
+  </body>
+</html>
