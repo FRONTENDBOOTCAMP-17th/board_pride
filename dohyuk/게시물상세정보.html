@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>제목임</title>
+    <link rel="stylesheet" href="./게시물상세정보.css" />
+  </head>
+  <body>
+    <fieldset>
+      <legend>게시물</legend>
+      <div class="contents">
+        <h1 id="title"></h1>
+        <time id="createdAt" datetime=""></time>
+        <p id="author"></p>
+        <p id="viewCount"></p>
+        <p id="content"></p>
+      </div>
+    </fieldset>
+    <div id="postActions">
+      <button id="deleteButton">삭제</button>
+      <button id="correctionButton">수정</button>
+    </div>
+    <script>
+      const url = new URLSearchParams(window.location.search);
+      const id = url.get("id");
+
+      console.log(id); // id값 잘 가져오는지 확인
+
+      loadPost();
+      async function loadPost() {
+        const postActions = document.getElementById("postActions");
+
+        const token = localStorage.getItem("token");
+        const post = {
+          title: document.getElementById("title"),
+          content: document.getElementById("content"),
+          author: document.getElementById("author"),
+          createDate: document.getElementById("createdAt"),
+          viewCount: document.getElementById("viewCount"),
+        };
+        try {
+          const res = await fetch(
+            `https://api.fullstackfamily.com/api/edu/test-c68e57/posts/${id}`,
+            {
+              method: "GET",
+            },
+          );
+          if (!res.ok) {
+            throw new Error("게시글을 불러오지 못했습니다.");
+          }
+
+          const data = await res.json();
+          console.log(data); // json확인
+          const postData = data.data;
+
+          //시간 배열로 짤라버리기
+          const [date, time] = postData.createdAt.split("T");
+
+          post.title.textContent = postData.title;
+          post.content.textContent = postData.content;
+          post.author.textContent = postData.authorNickname;
+          post.createDate.textContent = `${date} | ${time}`;
+          post.viewCount.textContent = postData.viewCount;
+
+          document.title = postData.title;
+
+          // 로그인 토큰값이 있을경우
+          if (token) {
+            const me = await fetch(
+              "https://api.fullstackfamily.com/api/edu/test-c68e57/auth/me",
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            );
+
+            if (me.ok) {
+              const meData = await me.json();
+
+              // 비교할수 있는 값이 닉네임밖에 없어보여서 nickName으로 비교
+              if (meData.data.nickname === postData.authorNickname) {
+                postActions.style.display = "flex";
+              }
+            }
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      deletePost();
+      function deletePost() {
+        const deleteBtn = document.getElementById("deleteButton");
+        if (!deleteBtn) {
+          return;
+        }
+
+        deleteBtn.addEventListener("click", async () => {
+          const token = localStorage.getItem("token");
+
+          const isReal = confirm("진짜 삭제합니까?");
+
+          if (!isReal) {
+            return;
+          }
+
+          try {
+            const deleteApi = await fetch(
+              `https://api.fullstackfamily.com/api/edu/test-c68e57/posts/${id}`,
+              {
+                method: "DELETE",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            );
+
+            if(!deleteApi.ok){
+                throw new Error("게시글 삭제에 실패했습니다.");
+            }
+
+            alert("게시글이 삭제되었습니다.");
+            location.replace("./게시판목록.html");
+          } catch(error) {
+            console.error(error);
+          }
+        });
+      }
+
+      correctionPost();
+      function correctionPost() {
+        const correctionBtn = document.getElementById("correctionButton");
+        if (!correctionBtn) {
+          return;
+        }
+
+        correctionBtn.addEventListener("click", async () => {
+          location.href = `./게시글수정.html?id=${id}`;
+        });
+      }
+    </script>
+  </body>
+</html>

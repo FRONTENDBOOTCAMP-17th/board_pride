@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>글쓰기</title>
+  </head>
+  <body>
+    <fieldset>
+      <legend>사용자 정보</legend>
+      <p id="userId"></p>
+      <p id="nickname"></p>
+    </fieldset>
+    <fieldset>
+      <legend>글쓰기</legend>
+      <label for="title">제목</label>
+      <input id="title" type="text" />
+      <br />
+
+      <label for="content">본문</label>
+      <textarea name="content" id="content"></textarea>
+      <br />
+
+      <button id="postCreateButton" type="button">글쓰기</button>
+    </fieldset>
+    <script>
+      handlerApi();
+      async function handlerApi() {
+        const postUsername = document.getElementById("userId");
+        const postNickname = document.getElementById("nickname");
+        // 로컬스토리지로부터 토큰.
+        const accessToken = localStorage.getItem("token");
+
+        try {
+          const res = await fetch(
+            "https://api.fullstackfamily.com/api/edu/test-c68e57/auth/me",
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + accessToken,
+              },
+            },
+          );
+
+          const { message, success, data } = await res.json();
+
+          if (!res.ok) {
+            throw new Error(
+              "HTTP 오류: " +
+                res.status +
+                "\n\n success: " +
+                success +
+                "\n\n message: " +
+                message,
+            );
+          }
+          const { id, nickname, username } = data;
+          postUsername.textContent = username;
+          postNickname.textContent = nickname;
+        } catch (error) {
+          console.error("에러:", error.message);
+        }
+      }
+
+      document
+        .getElementById("postCreateButton")
+        .addEventListener("click", async () => {
+          if (!handlerApi()) {
+            return;
+          }
+          const result = document.getElementById("result");
+
+          const post = {
+            title: document.getElementById("title").value,
+
+            content: document.getElementById("content").value,
+          };
+          const accessToken = localStorage.getItem("token");
+
+          try {
+            const draft = await fetch(
+              "https://api.fullstackfamily.com/api/edu/test-c68e57/posts",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: "Bearer " + accessToken,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  title: "새 게시글 목록",
+                  content: "게시글 내용을 작성합니다.",
+                }),
+              },
+            );
+
+            const draftData = await draft.json();
+            console.log(draftData.data.id);
+
+            const published = await fetch(
+              `https://api.fullstackfamily.com/api/edu/test-c68e57/posts/${draftData.data.id}/publish`,
+              {
+                method: "PUT",
+                headers: {
+                  Authorization: "Bearer " + accessToken,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(post),
+              },
+            );
+            const publishedData = await published.json();
+            console.log(publishedData);
+
+            if (!draft.ok) {
+              throw new Error("HTTP 오류: " + draft.status);
+            }
+
+            if (!published.ok) {
+              throw new Error("HTTP 오류: " + published.status);
+            }
+
+            location.replace("./게시판목록.html");
+          } catch (error) {
+            console.error = "에러: " + error.message;
+          }
+        });
+    </script>
+  </body>
+</html>
