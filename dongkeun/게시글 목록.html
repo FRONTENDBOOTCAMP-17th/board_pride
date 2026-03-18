@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>게시글 목록</title>
+    <style>
+      li {
+        background: lavender;
+        margin-bottom: 10px;
+        margin-left: -40px;
+        padding-left: 10px;
+        width: 50%;
+        list-style: none;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>게시글 목록</h2>
+    <ul id="postlist"></ul>
+    <p id="result"></p>
+
+    <script>
+      const token = localStorage.getItem("token");
+      const postlist = document.getElementById("postlist");
+      const result = document.getElementById("result");
+
+      async function loadPosts() {
+        try {
+          const res = await fetch(
+            "https://api.fullstackfamily.com/api/edu/ws-481f1b/posts",
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+              },
+            },
+          );
+
+          if (!res.ok) {
+            throw new Error("HTTP 오류: " + res.status);
+          }
+
+          const resJson = await res.json();
+          const contents = resJson.data.content;
+
+          if (contents.length === 0) {
+            result.textContent = "게시글이 없습니다.";
+            return;
+          }
+
+          postlist.textContent = "";
+
+          for (let i = 0; i < contents.length; i++) {
+            const con = contents[i];
+
+            const li = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = "./03_fetch_post-06detail.html?id=" + con.id;
+            link.textContent = con.title;
+            console.log(link.href);
+
+            const info = document.createElement("div");
+            info.textContent =
+              con.authorNickname +
+              " | 조회 " +
+              con.viewCount +
+              " | 댓글 " +
+              con.commentCount;
+
+            const post = document.createElement("div");
+            post.textContent = con.contentPreview;
+
+            li.appendChild(link);
+            li.appendChild(info);
+            li.appendChild(post);
+            postlist.appendChild(li);
+          }
+        } catch (error) {
+          result.textContent = "에러 발생: " + error.message;
+          result.style.color = "red";
+        }
+      }
+
+      loadPosts();
+    </script>
+  </body>
+</html>
