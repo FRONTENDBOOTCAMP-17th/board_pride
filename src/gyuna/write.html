@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>글쓰기</title>
+  </head>
+  <body>
+    <h2>게시글 작성</h2>
+
+    <p>이름: <span id="username"></span></p>
+
+    <input id="title" placeholder="제목" /><br /><br />
+    <textarea id="content" placeholder="내용"></textarea><br /><br />
+
+    <button id="writeBtn">글쓰기</button>
+
+    <script>
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("로그인이 필요합니다.");
+        window.location.href = "login.html";
+      } else {
+        loadUserInfo();
+      }
+
+      async function loadUserInfo() {
+        try {
+          const res = await fetch(
+            "https://api.fullstackfamily.com/api/edu/ws-283fc1/auth/me",
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
+
+          const data = await res.json();
+          console.log("내 정보:", data);
+
+          if (!res.ok) {
+            throw new Error("사용자 정보 조회 실패");
+          }
+
+          document.getElementById("username").textContent =
+            data.data.nickname || "이름 없음";
+        } catch (e) {
+          console.error(e);
+          document.getElementById("username").textContent =
+            "이름 불러오기 실패";
+        }
+      }
+
+      document
+        .getElementById("writeBtn")
+        .addEventListener("click", async () => {
+          const title = document.getElementById("title").value;
+          const content = document.getElementById("content").value;
+
+          try {
+            // 1. draft 생성
+            const draftRes = await fetch(
+              "https://api.fullstackfamily.com/api/edu/ws-283fc1/posts",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ title, content }),
+              },
+            );
+
+            const draftData = await draftRes.json();
+            console.log("draft:", draftData);
+
+            if (!draftRes.ok) {
+              throw new Error("드래프트 생성 실패");
+            }
+
+            const postId = draftData.data.id;
+
+            // 2. publish
+            const publishRes = await fetch(
+              `https://api.fullstackfamily.com/api/edu/ws-283fc1/posts/${postId}/publish`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ title, content }),
+              },
+            );
+
+            const publishData = await publishRes.json();
+            console.log("publish:", publishData);
+
+            if (!publishRes.ok) {
+              throw new Error("발행 실패");
+            }
+
+            alert("게시글 작성 완료!");
+            window.location.href = "list.html";
+          } catch (error) {
+            console.error(error);
+            alert("글 작성 실패");
+          }
+        });
+    </script>
+  </body>
+</html>
