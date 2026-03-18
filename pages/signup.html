@@ -5,41 +5,94 @@
     <title>회원가입</title>
     <style>
       body {
+        font-family: 'Pretendard', sans-serif;
+        background-color: #f5f6f8;
         display: flex;
         flex-direction: column;
+        justify-content: center;
         align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
       }
 
       fieldset {
+        background: white;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        width: 350px;
+        padding: 40px;
         display: flex;
         flex-flow: nowrap column;
-        gap: 20px;
-        inline-size: 300px;
-        margin-top: 50px;
+        gap: 12px;
         justify-content: center;
         text-align: center;
+        box-sizing: border-box;
       }
 
       legend {
-        font-size: 1.5em;
+        font-size: 26px;
+        font-weight: bold;
+        color: #333;
+        padding: 0 8px;
+        margin-bottom: 20px;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 14px;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #999;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        background-color: #222;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background 0.2s;
+        margin-top: 4px;
+      }
+
+      button:hover {
+        background-color: #444;
       }
 
       #result {
-        display: grid;
-        block-size: 30px;
+        margin-top: 15px;
+        min-height: 30px;
+        font-size: 14px;
+        font-weight: 700;
+        text-align: center;
+        white-space: pre-wrap;
       }
 
       .error {
         display: block;
         color: red;
-        font-size: 0.8em;
+        font-size: 12px;
         text-align: left;
-        margin-top: -10px;
+        margin-top: -6px;
+        margin-bottom: 2px;
+        min-height: 16px;
       }
 
       pre {
-        font-size: 1rem;
-        font-weight: 700;
+        font-family: 'Pretendard', sans-serif;
       }
     </style>
   </head>
@@ -117,6 +170,7 @@
           const data = await res.json();
           result.textContent = '회원가입 성공!\n' + '\nusername: ' + data.data.username + '\nnickname: ' + data.data.nickname;
           result.style.color = 'green';
+          location.replace('./login.html');
         } catch (error) {
           result.textContent = '에러 발생: ' + error.message;
           result.style.color = 'red';
