@@ -117,50 +117,51 @@
     </div>
 
     <script>
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
+      const API_URL = 'https://api.fullstackfamily.com/api/edu/pride-d1c90b/posts';
 
       if (!token) {
-        alert("로그인이 필요합니다.");
-        window.location.href = "login.html";
+        alert('로그인이 필요합니다.');
+        window.location.href = 'login.html';
       }
 
-      const postList = document.getElementById("post-list");
-      const message = document.getElementById("message");
+      const postList = document.getElementById('post-list');
+      const message = document.getElementById('message');
 
+      // 1. 게시글 목록 로드
       async function loadPosts() {
         try {
-          const res = await fetch(
-            "https://api.fullstackfamily.com/api/edu/ws-8fd532/posts",
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            },
-          );
+          const res = await fetch(API_URL, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
           const data = await res.json();
           const posts = data.data.content;
 
           if (!posts || posts.length === 0) {
-            message.textContent = "게시글이 없습니다.";
+            message.textContent = '게시글이 없습니다.';
+            postList.innerHTML = '';
             return;
           }
 
-          message.textContent = "";
+          message.textContent = '';
+          postList.innerHTML = ''; // 목록 초기화
 
           posts.forEach((post) => {
-            const div = document.createElement("div");
-            div.className = "post";
+            const div = document.createElement('div');
+            div.className = 'post';
 
             div.innerHTML = `
-              <a href="detail.html?id=${post.id}">
-                ${post.title}
-              </a>
-              <div class="info">
-                ${post.authorNickname} | 조회 ${post.viewCount} | 댓글 ${post.commentCount}
+              <div class="post-content">
+                <a href="detail.html?id=${post.id}">${post.title}</a>
+                <div class="info">
+                  ${post.authorNickname} | 조회 ${post.viewCount} | 댓글 ${post.commentCount}
+                </div>
+                <div class="preview">${post.contentPreview}</div>
               </div>
-              <div class="preview">
-                ${post.contentPreview}
+              <div class="btn-group">
+                <button class="edit-btn" onclick="goToEdit('${post.id}')">수정</button>
+                <button class="delete-btn" onclick="deletePost('${post.id}')">삭제</button>
               </div>
             `;
 
@@ -168,21 +169,51 @@
           });
         } catch (error) {
           console.error(error);
-          message.style.color = "red";
-          message.textContent = "게시글 불러오기 실패";
+          message.style.color = 'red';
+          message.textContent = '게시글 불러오기 실패';
         }
       }
 
+      // 2. 수정 페이지 이동
+      function goToEdit(id) {
+        window.location.href = `write.html?id=${id}`;
+      }
+
+      // 3. 삭제 처리
+      async function deletePost(id) {
+        if (!confirm('정말 삭제할까요?')) return;
+
+        try {
+          const res = await fetch(`${API_URL}/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (res.ok) {
+            alert('삭제되었습니다.');
+            loadPosts(); // 목록 다시 불러오기
+          } else {
+            const errorData = await res.json();
+            alert(errorData.message || '삭제 권한이 없습니다.');
+          }
+        } catch (error) {
+          console.error('삭제 요청 오류:', error);
+          alert('삭제 중 오류가 발생했습니다.');
+        }
+      }
+
+      // 초기 실행
       loadPosts();
 
-      document.getElementById("writeBtn").onclick = () => {
-        window.location.href = "write.html";
+      // 상단 버튼 이벤트
+      document.getElementById('writeBtn').onclick = () => {
+        window.location.href = 'write.html';
       };
 
-      document.getElementById("logoutBtn").onclick = () => {
-        localStorage.removeItem("token");
-        alert("로그아웃되었습니다.");
-        window.location.href = "login.html";
+      document.getElementById('logoutBtn').onclick = () => {
+        localStorage.removeItem('token');
+        alert('로그아웃되었습니다.');
+        window.location.href = 'login.html';
       };
     </script>
   </body>
