@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>내 정보 조회</title>
+  </head>
+
+  <body>
+    <h2>내정보</h2>
+    <button id="submitBtn">내 정보</button>
+    <pre id="result"></pre>
+
+    <script>
+      async function apiFetch(url, options = {}) {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(url, {
+          ...options,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            ...options.headers,
+          },
+        });
+
+        return res;
+      }
+
+      document
+        .getElementById("submitBtn")
+        .addEventListener("click", async () => {
+          const result = document.getElementById("result");
+
+          try {
+            result.textContent = "내 정보 조회 중...";
+
+            const meRes = await apiFetch(
+              "https://api.fullstackfamily.com/api/edu/test-c68e57/auth/me",
+              {
+                method: "GET",
+              },
+            );
+
+            if (!meRes.ok) {
+              throw new Error("내 정보 조회 HTTP 오류: " + meRes.status);
+            }
+
+            const meData = await meRes.json();
+
+            result.textContent =
+              "[내 정보 조회 결과]\n\n" + JSON.stringify(meData, null, 2);
+
+            result.style.color = "green";
+          } catch (error) {
+            result.textContent = "에러: " + error.message;
+            result.style.color = "red";
+          }
+        });
+    </script>
+  </body>
+</html>
