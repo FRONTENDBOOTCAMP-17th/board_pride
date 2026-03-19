@@ -7,12 +7,15 @@ const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
 
 const content = document.getElementById("comment-create");
-const 댓글내용 = content.value;
+
+loadComments();
 
 btn.addEventListener("click", () => {
-
-    Api.createComments({ postId: id, content: 댓글내용 });
+    Api.createComments(id,content.value);
 });
 
-renderComments(content);
-Api.searchComments(id);
+async function loadComments() {
+    const comments = await Api.searchComments(id);
+    console.log(comments.data);
+    renderComments(comments.data);
+}

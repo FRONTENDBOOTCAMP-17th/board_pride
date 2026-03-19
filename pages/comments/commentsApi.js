@@ -1,6 +1,6 @@
 import {request} from "./apiHandler.js";
 
-const BASE_URL = "https://api.fullstackfamily.com/api/edu/pride-d1c90b/";
+const BASE_URL = "https://api.fullstackfamily.com/api/edu/pride-d1c90b";
 
 // 생성
 export function createComments(postId, content) {
