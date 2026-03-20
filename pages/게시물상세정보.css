@@ -40,16 +40,34 @@ legend {
   word-break: keep-all;
 }
 
-#createdAt,
-#author,
-#viewCount {
+#createdAt {
+  display: inline-block;
   font-size: 14px;
   color: #666;
   margin: 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #eceff3;
+}
+
+/* 작성자 + 조회수 한 줄 */
+#author,
+#viewCount {
+  display: inline-block;
+  font-size: 14px;
+  color: #666;
+  margin-right: 12px;
+}
+
+#viewCount::before {
+  content: "조회수 ";
+  font-weight: 600;
+  color: #333;
 }
 
 #content {
   margin: 12px 0 0;
+  padding: 20px 0 0;
+  border-top: 1px solid #eceff3;
   font-size: 16px;
   line-height: 1.7;
   color: #444;
@@ -93,6 +111,136 @@ legend {
   background-color: #444;
 }
 
+#comment-components {
+  max-width: 800px;
+  margin: 24px auto 0;
+}
+
+.comments-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+}
+
+.comments-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  background: white;
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.author-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+}
+
+.create-at,
+.update-at {
+  font-size: 13px;
+  color: #777;
+}
+
+.comment-content {
+  width: 100%;
+  margin: 4px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #444;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.comment-correction,
+.comment-delete {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background-color 0.2s ease;
+}
+
+.comment-correction {
+  background-color: #f1f3f5;
+  color: #333;
+}
+
+.comment-correction:hover {
+  background-color: #e9ecef;
+}
+
+.comment-delete {
+  background-color: #222;
+  color: white;
+}
+
+.comment-delete:hover {
+  background-color: #444;
+}
+
+label[for='comment-create'] {
+  display: block;
+  max-width: 800px;
+  margin: 28px auto 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+}
+
+#comment-create {
+  display: block;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  border: 1px solid #dcdfe4;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #333;
+  background-color: white;
+  box-sizing: border-box;
+}
+
+#comment-create:focus {
+  outline: none;
+  border-color: #222;
+}
+
+#comment-success {
+  display: block;
+  max-width: 800px;
+  margin: 12px auto 0;
+  margin-left: auto;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  background-color: #222;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#comment-success:hover {
+  background-color: #444;
+}
+
+#comment-message {
+  max-width: 800px;
+  margin: 20px auto 0;
+  font-size: 14px;
+  color: #666;
+}
+
 @media (max-width: 640px) {
   body {
     padding: 24px 16px;
@@ -106,11 +254,32 @@ legend {
     font-size: 24px;
   }
 
+  #author,
+  #viewCount {
+    display: block;
+    width: 100%;
+    margin-right: 0;
+  }
+
   #postActions {
     flex-direction: column;
   }
 
   #postActions button {
+    width: 100%;
+  }
+
+  .comments-info {
+    padding: 16px;
+  }
+
+  .comment-correction,
+  .comment-delete {
+    width: 100%;
+  }
+
+  #comment-create,
+  #comment-success {
     width: 100%;
   }
 }
