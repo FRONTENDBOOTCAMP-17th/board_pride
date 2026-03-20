@@ -23,7 +23,6 @@
       <button id="correctionButton">수정</button>
     </div>
     <div id="comment-components">
-      <div id="comment-message"></div>
       <!-- 댓글 대충여기에 적힘 -->
     </div>
     <label for="comment-create">댓글</label>
@@ -43,6 +42,7 @@
         const postActions = document.getElementById('postActions');
 
         const token = localStorage.getItem('token');
+        console.log(token);
         const post = {
           title: document.getElementById('title'),
           content: document.getElementById('content'),
